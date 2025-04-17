@@ -11,15 +11,20 @@ import json
 import requests
 from datetime import datetime
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from openai import OpenAI
 import yagmail
 from dotenv import load_dotenv
 import base64  # 用于图片编码
 # 设置图片清晰度
 plt.rcParams['figure.dpi'] = 300
-
-# 设置中文字体列表，按优先级排序，确保图表中文正常显示
-plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS', 'PingFang HK', 'STHeiti', 'Heiti TC']
+# 设置中文字体
+font_path = './fonts/SimHei.ttf'
+font_prop = fm.FontProperties(fname=font_path)
+# 将字体名称添加到系统字体列表
+fm.fontManager.addfont(font_path)
+# 设置全局字体
+plt.rcParams['font.sans-serif'] = ['SimHei']
 
 # 解决负号显示问题
 plt.rcParams['axes.unicode_minus'] = False
