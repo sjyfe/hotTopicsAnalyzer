@@ -1,0 +1,6 @@
+requests
+openai
+matplotlib
+python-dotenv
+yagmail
+keyring
