@@ -18,8 +18,8 @@ import base64  # 用于图片编码
 # 设置图片清晰度
 plt.rcParams['figure.dpi'] = 300
 
-# 设置字体为黑体
-plt.rcParams['font.sans-serif'] = ['SimHei']
+# 设置中文字体列表，按优先级排序，确保图表中文正常显示
+plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS', 'PingFang HK', 'STHeiti', 'Heiti TC']
 
 # 解决负号显示问题
 plt.rcParams['axes.unicode_minus'] = False
