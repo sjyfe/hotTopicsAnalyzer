@@ -4,3 +4,4 @@ matplotlib
 python-dotenv
 yagmail
 keyring
+markdown2

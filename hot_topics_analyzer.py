@@ -3,7 +3,7 @@
 
 """
 热点数据分析与推送系统
-功能：自动获取百度热搜数据，通过DeepSeek API进行智能分析，生成报告并发送邮件
+功能：自动获取百度热搜数据，通过LLM API进行智能分析，生成报告并发送邮件
 """
 
 import os
@@ -16,6 +16,8 @@ from openai import OpenAI
 import yagmail
 from dotenv import load_dotenv
 import base64  # 用于图片编码
+import markdown2 # 用于转化markdown2html
+
 # 设置图片清晰度
 plt.rcParams['figure.dpi'] = 300
 # 设置中文字体
@@ -37,8 +39,9 @@ class HotTopicsAnalyzer:
     def __init__(self):
         """初始化系统配置"""
         # API配置
-        self.deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
-        self.deepseek_base_url = "https://api.deepseek.com"
+        self.api_key = os.getenv("API_KEY")
+        self.base_url = os.getenv("BASE_URL", "https://open.bigmodel.cn/api/paas/v4/")
+        self.model_name = os.getenv("MODEL_NAME", "glm-4-flash")
         
         # 邮件配置
         self.email_user = os.getenv("EMAIL_USER")
@@ -56,13 +59,13 @@ class HotTopicsAnalyzer:
                 os.makedirs(directory)
         
         # OpenAI客户端配置
-        if self.deepseek_api_key:
+        if self.api_key:
             self.ai_client = OpenAI(
-                api_key=self.deepseek_api_key,
-                base_url=self.deepseek_base_url
+                api_key=self.api_key,
+                base_url=self.base_url
             )
         else:
-            print("警告: 未设置DEEPSEEK_API_KEY环境变量，AI分析功能将不可用")
+            print("警告: 未设置LLM API_KEY环境变量，AI分析功能将不可用")
             self.ai_client = None
     
     def get_baidu_hot(self):
@@ -105,9 +108,9 @@ class HotTopicsAnalyzer:
         return filename
     
     def analyze_with_ai(self, hot_topics):
-        """使用DeepSeek API分析热搜数据"""
+        """使用LLM API分析热搜数据"""
         if not self.ai_client:
-            return "AI分析功能未启用，请设置DEEPSEEK_API_KEY环境变量"
+            return "AI分析功能未启用，请设置API_KEY环境变量"
         
         # 构建提示词
         topics_text = "\n".join([f"{i+1}. {item['title']} (热度: {item['hot_score']})" 
@@ -129,7 +132,7 @@ class HotTopicsAnalyzer:
         
         try:
             response = self.ai_client.chat.completions.create(
-                model="deepseek-chat",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": "你是一位专业的数据分析师和趋势洞察专家"},
                     {"role": "user", "content": prompt},
@@ -191,7 +194,7 @@ class HotTopicsAnalyzer:
             """
         
         # 处理分析文本，将换行符替换为HTML换行标签
-        analysis_html = analysis.replace('\n', '<br>')
+        analysis_html = markdown2.markdown(analysis).replace('\n', '')
         
         # 图片处理 - 将图片转为base64编码
         image_html = ''
